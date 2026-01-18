@@ -1,4 +1,4 @@
-This tool automates the dumping of SAM and SYSTEM registry hives. It handles UAC escalation, compresses data to bypass Discord's 25MB limit, and exfiltrates via Webhooks.
+This tool automates the dumping of SAM and SYSTEM registry hives, handles UAC escalation, compresses data to bypass Discord's 25MB limit, exfiltrates via Webhooks, and performs a secure cleanup of all temporary files post-exfiltration.
 
 ## Quick Start
 Open exfiltrator.py and replace YOUR_WEBHOOK with your Discord Webhook URL.
